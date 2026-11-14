@@ -380,31 +380,9 @@ test("long task text does not cause horizontal overflow", async ({ page }) => {
   }
 });
 
-test("the system preference follows the initial and changing system theme", async ({
-  page,
-}) => {
-  await page.emulateMedia({ colorScheme: "dark" });
+test("only two theme controls are offered", async ({ page }) => {
   await page.goto("/");
-  await expectTheme(page, "system", "dark");
-  await expect(
-    page.getByRole("button", { name: "Как в системе", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
-  const darkBackground = await page.locator("body").evaluate((element) => {
-    return getComputedStyle(element).backgroundColor;
-  });
-
-  await page.emulateMedia({ colorScheme: "light" });
-  await expectTheme(page, "system", "light");
-  await expect
-    .poll(() =>
-      page.locator("body").evaluate((element) => {
-        return getComputedStyle(element).backgroundColor;
-      }),
-    )
-    .not.toBe(darkBackground);
-
-  await page.emulateMedia({ colorScheme: "dark" });
-  await expectTheme(page, "system", "dark");
+  await expect(page.locator("[data-theme-option]")).toHaveCount(2);
 });
 
 for (const [preference, label, opposite] of [
@@ -444,16 +422,6 @@ for (const [preference, label, opposite] of [
     await expect(page.locator("#progress-label")).toHaveText(
       "1 из 1 выполнено",
     );
-
-    await page
-      .getByRole("button", { name: "Как в системе", exact: true })
-      .click();
-    await expectTheme(page, "system", opposite);
-    await page.reload();
-    await expectTheme(page, "system", opposite);
-    await expect(page.locator(".task-text")).toHaveText(
-      "Сохранить дело при смене темы",
-    );
   });
 }
 
@@ -476,7 +444,7 @@ test("a blocked theme store still allows selection and does not affect task stor
   }, themeStorageKey);
   await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/");
-  await expectTheme(page, "system", "dark");
+  await expectTheme(page, "dark", "dark");
 
   await page.getByRole("button", { name: "Светлая", exact: true }).click();
   await expectTheme(page, "light", "light");
@@ -491,7 +459,7 @@ test("a blocked theme store still allows selection and does not affect task stor
   await expectTheme(page, "dark", "dark");
 
   await page.reload();
-  await expectTheme(page, "system", "dark");
+  await expectTheme(page, "dark", "dark");
   await expect(page.locator(".task-text")).toHaveText(
     "Задачи сохраняются независимо от темы",
   );
@@ -507,7 +475,7 @@ test("theme selection is synchronized between tabs without clearing tasks", asyn
   const other = await context.newPage();
   await other.emulateMedia({ colorScheme: "dark" });
   await other.goto("/");
-  await expectTheme(other, "system", "dark");
+  await expectTheme(other, "dark", "dark");
 
   await other.getByRole("button", { name: "Светлая", exact: true }).click();
   await expectTheme(other, "light", "light");
@@ -524,9 +492,9 @@ test("theme selection is synchronized between tabs without clearing tasks", asyn
   );
 
   await other.evaluate((key) => localStorage.removeItem(key), themeStorageKey);
-  await expectTheme(page, "system", "dark");
+  await expectTheme(page, "dark", "dark");
   await page.emulateMedia({ colorScheme: "light" });
-  await expectTheme(page, "system", "light");
+  await expectTheme(page, "dark", "dark");
   await expect(page.locator(".task-text")).toHaveText(
     "Не менять задачи вместе с темой",
   );

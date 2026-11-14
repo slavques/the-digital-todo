@@ -12,6 +12,7 @@ for (const file of [
   "tokens.css",
   "base.css",
   "app.js",
+  "motion.js",
   "model.js",
   "theme.js",
 ]) {

@@ -2,17 +2,21 @@
   "use strict";
 
   const storageKey = "quiet-list:theme";
-  const preferences = new Set(["system", "light", "dark"]);
+  const preferences = new Set(["light", "dark"]);
   const root = document.documentElement;
   const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
-  let preference = "system";
+  let preference = systemTheme.matches ? "dark" : "light";
   let buttons = [];
   let notice = null;
   let ready = false;
   let storageWarning = "";
 
   function normalizePreference(value) {
-    return preferences.has(value) ? value : "system";
+    return preferences.has(value)
+      ? value
+      : systemTheme.matches
+        ? "dark"
+        : "light";
   }
 
   function updateControls() {
@@ -41,12 +45,7 @@
   function applyPreference(value) {
     preference = normalizePreference(value);
     root.dataset.themePreference = preference;
-    root.dataset.mode =
-      preference === "system"
-        ? systemTheme.matches
-          ? "dark"
-          : "light"
-        : preference;
+    root.dataset.mode = preference;
 
     if (ready) {
       updateControls();
@@ -79,6 +78,7 @@
     buttons = [...document.querySelectorAll("[data-theme-option]")];
     notice = document.querySelector("#theme-notice");
     ready = true;
+    root.classList.add("theme-ready");
 
     for (const button of buttons) {
       if (!preferences.has(button.dataset.themeOption)) continue;
@@ -96,10 +96,6 @@
   } else {
     bindControls();
   }
-
-  systemTheme.addEventListener("change", () => {
-    if (preference === "system") applyPreference(preference);
-  });
 
   window.addEventListener("storage", (event) => {
     if (event.key !== storageKey && event.key !== null) return;

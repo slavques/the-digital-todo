@@ -12,6 +12,7 @@
     <script src="theme.js"></script>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
+    <script src="assets/vendor/gsap.min.js"></script>
     <script type="module" src="app.js"></script>
   </head>
   <body>
@@ -51,18 +52,6 @@
               <path
                 d="M16.8 12.1A7.2 7.2 0 0 1 7.9 3.2 7.2 7.2 0 1 0 16.8 12.1Z"
               />
-            </svg>
-          </button>
-          <button
-            type="button"
-            data-theme-option="system"
-            aria-label="Как в системе"
-            aria-pressed="true"
-            title="Как в системе"
-          >
-            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <rect x="2" y="3" width="16" height="11" rx="2" />
-              <path d="M7 18h6M10 14v4" />
             </svg>
           </button>
         </div>
@@ -138,18 +127,20 @@
             </div>
           </div>
         </div>
-        <div class="workspace-footer">
-          <span id="save-label">Сохраняется в этом браузере</span
-          ><a
-            class="source-link"
-            href="https://github.com/slavques/the-digital-todo"
-            >Код на GitHub</a
-          >
-        </div>
+        <span id="save-label" class="sr-only"></span>
       </section>
-      <div class="feedback">
+      <div class="feedback" data-visible="false">
         <p id="notice" role="status" aria-live="polite" aria-atomic="true"></p>
         <button id="undo-delete" type="button" hidden>Отменить удаление</button>
+        <button
+          id="dismiss-notice"
+          type="button"
+          aria-label="Закрыть уведомление"
+        >
+          ×
+        </button>
+      </div>
+      <div class="theme-feedback">
         <p id="theme-notice" role="status" hidden></p>
       </div>
       <noscript

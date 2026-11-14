@@ -1,4 +1,11 @@
 import {
+  captureRows,
+  animateRows,
+  popToast,
+  hideToast,
+  moveFilter,
+} from "./motion.js";
+import {
   STORAGE_KEY,
   addTask,
   deleteTask,
@@ -17,10 +24,28 @@ let tasks = [];
 let filter = "all";
 let storageAvailable = true;
 let lastDeletion = null;
+let toastTimer;
+const toast = document.querySelector(".feedback");
+function dismissToast() {
+  if (toast.contains(document.activeElement)) input.focus();
+  hideToast(toast, () => {
+    toast.dataset.visible = "false";
+  });
+  clearTimeout(toastTimer);
+}
+$("#dismiss-notice").addEventListener("click", dismissToast);
+toast.addEventListener("pointerenter", () => clearTimeout(toastTimer));
+toast.addEventListener("focusin", () => clearTimeout(toastTimer));
 
 function announce(message, kind = "success") {
   notice.textContent = message;
   notice.dataset.kind = kind;
+  toast.dataset.kind = kind;
+  toast.dataset.visible = "true";
+  clearTimeout(toastTimer);
+  popToast(toast);
+  if (kind !== "error" && !lastDeletion)
+    toastTimer = setTimeout(dismissToast, 4500);
 }
 
 function clearUndo() {
@@ -83,6 +108,7 @@ function saveAndRender(message) {
 
 function createTaskElement(task, index) {
   const item = document.createElement("li");
+  item.dataset.id = task.id;
   item.className = `task${task.done ? " completed" : ""}`;
 
   const label = document.createElement("label");
@@ -139,7 +165,8 @@ function createTaskElement(task, index) {
   return item;
 }
 
-function render() {
+function render(filterChange = false) {
+  const previous = captureRows(list);
   if (undoButton) undoButton.hidden = !lastDeletion;
   const completed = tasks.filter((task) => task.done).length;
   const percent = tasks.length
@@ -156,6 +183,8 @@ function render() {
 
   const visible = visibleTasks();
   list.replaceChildren(...visible.map(createTaskElement));
+  if (previous.size || visible.length)
+    animateRows(list, previous, filterChange);
   $("#empty").hidden = visible.length > 0;
 
   const emptyMessages = {
@@ -177,6 +206,7 @@ function render() {
   for (const button of filterButtons) {
     button.setAttribute("aria-pressed", button.dataset.filter === filter);
   }
+  moveFilter();
 }
 
 $("#add-form").addEventListener("submit", (event) => {
@@ -215,7 +245,7 @@ undoButton?.addEventListener("click", () => {
 for (const button of filterButtons) {
   button.addEventListener("click", () => {
     filter = button.dataset.filter;
-    render();
+    render(true);
   });
 }
 

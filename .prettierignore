@@ -6,3 +6,5 @@ site/
 .taste-skill/
 shots/
 package-lock.json
+
+assets/vendor/
