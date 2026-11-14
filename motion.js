@@ -189,3 +189,81 @@ export function hideToast(element, done) {
     },
   });
 }
+
+// Read the live progress before a re-render so rapid toggles reverse smoothly.
+export function captureStrikes(list) {
+  const states = new Map();
+  for (const row of list.children) {
+    const text = row.querySelector(".task-text");
+    states.set(row.dataset.id, {
+      done: row.classList.contains("completed"),
+      progress:
+        getComputedStyle(text).getPropertyValue("--strike").trim() || "0%",
+    });
+    if (gsap) gsap.killTweensOf(text);
+  }
+  return states;
+}
+export function animateStrikes(list, previous) {
+  for (const row of list.children) {
+    const text = row.querySelector(".task-text");
+    const done = row.classList.contains("completed");
+    const old = previous.get(row.dataset.id);
+    if (!gsap || reduced.matches || !old) continue;
+    const target = done ? "100%" : "0%";
+    if (old.progress === target) continue;
+    const animation = gsap.fromTo(
+      text,
+      { "--strike": old.progress },
+      {
+        "--strike": target,
+        duration: 0.38,
+        ease: "power2.inOut",
+        overwrite: true,
+        onComplete() {
+          text.style.removeProperty("--strike");
+          active.delete(animation);
+        },
+        onInterrupt() {
+          active.delete(animation);
+        },
+      },
+    );
+    active.add(animation);
+  }
+}
+
+export function captureRegion(region) {
+  const height = region.getBoundingClientRect().height;
+  if (gsap) gsap.killTweensOf(region);
+  region.style.removeProperty("height");
+  return height;
+}
+export function animateRegion(region, previousHeight) {
+  if (!gsap || reduced.matches) return;
+  const height = region.getBoundingClientRect().height;
+  if (Math.abs(height - previousHeight) < 1) return;
+  const animation = gsap.fromTo(
+    region,
+    { height: previousHeight },
+    {
+      height,
+      duration: 0.42,
+      ease: "power3.inOut",
+      overwrite: true,
+      onComplete() {
+        region.style.removeProperty("height");
+        active.delete(animation);
+      },
+      onInterrupt() {
+        active.delete(animation);
+      },
+    },
+  );
+  active.add(animation);
+}
+window.addEventListener("resize", () => {
+  const region = document.querySelector(".task-region");
+  if (gsap) gsap.killTweensOf(region);
+  region.style.removeProperty("height");
+});

@@ -4,6 +4,10 @@ import {
   popToast,
   hideToast,
   moveFilter,
+  captureStrikes,
+  animateStrikes,
+  captureRegion,
+  animateRegion,
 } from "./motion.js";
 import {
   STORAGE_KEY,
@@ -22,6 +26,9 @@ const filterButtons = [...document.querySelectorAll("[data-filter]")];
 
 let tasks = [];
 let filter = "all";
+let page = 1;
+const PAGE_SIZE = 6;
+const region = document.querySelector(".task-region");
 let storageAvailable = true;
 let lastDeletion = null;
 let toastTimer;
@@ -130,7 +137,10 @@ function createTaskElement(task, index) {
   const text = document.createElement("span");
   text.className = "task-text";
   text.textContent = task.text;
-  label.append(checkbox, text);
+  const copy = document.createElement("span");
+  copy.className = "task-copy";
+  copy.append(text);
+  label.append(checkbox, copy);
 
   const remove = document.createElement("button");
   remove.type = "button";
@@ -166,6 +176,8 @@ function createTaskElement(task, index) {
 }
 
 function render(filterChange = false) {
+  const previousHeight = captureRegion(region);
+  const strikes = captureStrikes(list);
   const previous = captureRows(list);
   if (undoButton) undoButton.hidden = !lastDeletion;
   const completed = tasks.filter((task) => task.done).length;
@@ -181,8 +193,13 @@ function render(filterChange = false) {
     ? "Сохраняется в этом браузере"
     : "Сохранение недоступно";
 
-  const visible = visibleTasks();
+  const filtered = visibleTasks();
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  page = Math.min(page, pages);
+  const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  renderPagination(filtered.length, pages);
   list.replaceChildren(...visible.map(createTaskElement));
+  animateStrikes(list, strikes);
   if (previous.size || visible.length)
     animateRows(list, previous, filterChange);
   $("#empty").hidden = visible.length > 0;
@@ -207,6 +224,7 @@ function render(filterChange = false) {
     button.setAttribute("aria-pressed", button.dataset.filter === filter);
   }
   moveFilter();
+  animateRegion(region, previousHeight);
 }
 
 $("#add-form").addEventListener("submit", (event) => {
@@ -221,6 +239,7 @@ $("#add-form").addEventListener("submit", (event) => {
   clearUndo();
   tasks = addTask(tasks, input.value, crypto.randomUUID());
   filter = "all";
+  page = Math.max(1, Math.ceil(tasks.length / PAGE_SIZE));
   saveAndRender("Задача добавлена.");
   input.value = "";
   input.focus();
@@ -235,6 +254,10 @@ undoButton?.addEventListener("click", () => {
   clearUndo();
   tasks = [...tasks.slice(0, index), task, ...tasks.slice(index)];
   if (!visibleTasks().some((item) => item.id === task.id)) filter = "all";
+  page =
+    Math.floor(
+      visibleTasks().findIndex((item) => item.id === task.id) / PAGE_SIZE,
+    ) + 1;
   saveAndRender("Удаление отменено.");
   focusTask(
     task.id,
@@ -245,6 +268,7 @@ undoButton?.addEventListener("click", () => {
 for (const button of filterButtons) {
   button.addEventListener("click", () => {
     filter = button.dataset.filter;
+    page = 1;
     render(true);
   });
 }
@@ -270,4 +294,62 @@ window.addEventListener("storage", (event) => {
   }
 });
 
+function renderPagination(total, pages) {
+  $("#pagination").hidden = pages <= 1;
+  $("#page-range").textContent = total
+    ? `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} из ${total}`
+    : "";
+  $("#previous-page").disabled = page === 1;
+  $("#next-page").disabled = page === pages;
+  const compactPages = matchMedia("(max-width: 480px)").matches;
+  const numbers =
+    pages <= (compactPages ? 3 : 7)
+      ? Array.from({ length: pages }, (_, i) => i + 1)
+      : [
+          ...new Set(
+            compactPages
+              ? [1, page, pages]
+              : [1, page - 1, page, page + 1, pages],
+          ),
+        ]
+          .filter((n) => n >= 1 && n <= pages)
+          .sort((a, b) => a - b);
+  const fragment = document.createDocumentFragment();
+  numbers.forEach((number, index) => {
+    if (index && number > numbers[index - 1] + 1) {
+      const gap = document.createElement("span");
+      gap.textContent = "…";
+      gap.setAttribute("aria-hidden", "true");
+      fragment.append(gap);
+    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = number;
+    button.setAttribute("aria-label", `Страница ${number}`);
+    if (number === page) button.setAttribute("aria-current", "page");
+    button.addEventListener("click", () => changePage(number));
+    fragment.append(button);
+  });
+  $("#page-list").replaceChildren(fragment);
+}
+function changePage(number) {
+  page = number;
+  render(true);
+  $('#page-list [aria-current="page"]')?.focus();
+  if (region.getBoundingClientRect().top < 0)
+    region.scrollIntoView({
+      block: "start",
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+    });
+}
+$("#previous-page").addEventListener("click", () => changePage(page - 1));
+$("#next-page").addEventListener("click", () => changePage(page + 1));
+
 render();
+
+window.addEventListener("resize", () => {
+  const count = visibleTasks().length;
+  renderPagination(count, Math.max(1, Math.ceil(count / PAGE_SIZE)));
+});
