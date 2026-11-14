@@ -199,7 +199,9 @@ test("a write failure remains visible until saving succeeds again", async ({
   });
   await page
     .getByRole("checkbox", { name: "Не потерять предупреждение", exact: true })
-    .check();
+    .press("Space");
+  await expect(page.locator(".task")).toHaveCount(0);
+  await expect(page.locator('[data-filter="active"]')).toBeFocused();
   await expect(page.locator("#notice")).not.toContainText(
     "Не удалось сохранить",
   );
