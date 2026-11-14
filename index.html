@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f5f3ed"><title>Тихий список — задачи без суеты</title><link rel="stylesheet" href="styles.css"><script type="module" src="app.js"></script></head>
+<body>
+<main>
+<header class="masthead"><a class="brand" href="./" aria-label="Тихий список, главная"><span class="mark" aria-hidden="true">✓</span> тихий список</a><span class="local-label">Личное пространство</span></header>
+<section class="intro"><p class="eyebrow">МЕНЬШЕ ШУМА. БОЛЬШЕ ДЕЛА.</p><h1>По одному<br><em>делу за раз.</em></h1><p class="subtitle">Освободите голову. Запишите важное,<br class="desktop-break"> а затем просто начните.</p></section>
+<section class="workspace" aria-label="Список задач">
+<div class="workspace-heading"><h2>Мои задачи</h2><span id="progress-label">0 из 0 выполнено</span></div>
+<div class="progress-track" role="progressbar" aria-label="Выполненные задачи" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress"></div></div>
+<form id="add-form"><label class="sr-only" for="task-input">Новая задача</label><input id="task-input" name="task" maxlength="300" placeholder="Что нужно сделать?" autocomplete="off" required><button class="add-button" type="submit"><span aria-hidden="true">+</span> Добавить</button></form>
+<div class="list-toolbar"><div class="filters" role="group" aria-label="Фильтр задач"><button type="button" data-filter="all" aria-pressed="true">Все <span id="all-count">0</span></button><button type="button" data-filter="active" aria-pressed="false">В работе</button><button type="button" data-filter="done" aria-pressed="false">Готово</button></div></div>
+<ul id="tasks" aria-label="Задачи"></ul>
+<div id="empty" class="empty"><span class="empty-icon" aria-hidden="true">↗</span><h3>Начните с малого</h3><p>Добавьте первое дело. Остальное по порядку.</p></div>
+<div class="workspace-footer"><span class="status-dot" aria-hidden="true"></span><span id="save-label">Сохраняется в этом браузере</span></div>
+</section>
+<p id="notice" role="status" aria-live="polite"></p>
+<footer class="footer"><span>Ваш темп. Ваш список.</span><span>Без аккаунта · Без лишнего</span></footer>
+</main>
+</body></html>
