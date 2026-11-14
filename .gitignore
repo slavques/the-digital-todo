@@ -1,3 +1,6 @@
 node_modules/
 tests/*.png
+playwright-report/
+test-results/
+site/
 .DS_Store

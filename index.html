@@ -1,20 +1,111 @@
 <!doctype html>
 <html lang="ru">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f5f3ed"><title>Тихий список — задачи без суеты</title><link rel="stylesheet" href="styles.css"><script type="module" src="app.js"></script></head>
-<body>
-<main>
-<header class="masthead"><a class="brand" href="./" aria-label="Тихий список, главная"><span class="mark" aria-hidden="true">✓</span> тихий список</a><span class="local-label">Личное пространство</span></header>
-<section class="intro"><p class="eyebrow">МЕНЬШЕ ШУМА. БОЛЬШЕ ДЕЛА.</p><h1>По одному<br><em>делу за раз.</em></h1><p class="subtitle">Освободите голову. Запишите важное,<br class="desktop-break"> а затем просто начните.</p></section>
-<section class="workspace" aria-label="Список задач">
-<div class="workspace-heading"><h2>Мои задачи</h2><span id="progress-label">0 из 0 выполнено</span></div>
-<div class="progress-track" role="progressbar" aria-label="Выполненные задачи" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress"></div></div>
-<form id="add-form"><label class="sr-only" for="task-input">Новая задача</label><input id="task-input" name="task" maxlength="300" placeholder="Что нужно сделать?" autocomplete="off" required><button class="add-button" type="submit"><span aria-hidden="true">+</span> Добавить</button></form>
-<div class="list-toolbar"><div class="filters" role="group" aria-label="Фильтр задач"><button type="button" data-filter="all" aria-pressed="true">Все <span id="all-count">0</span></button><button type="button" data-filter="active" aria-pressed="false">В работе</button><button type="button" data-filter="done" aria-pressed="false">Готово</button></div></div>
-<ul id="tasks" aria-label="Задачи"></ul>
-<div id="empty" class="empty"><span class="empty-icon" aria-hidden="true">↗</span><h3>Начните с малого</h3><p>Добавьте первое дело. Остальное по порядку.</p></div>
-<div class="workspace-footer"><span class="status-dot" aria-hidden="true"></span><span id="save-label">Сохраняется в этом браузере</span></div>
-</section>
-<p id="notice" role="status" aria-live="polite"></p>
-<footer class="footer"><span>Ваш темп. Ваш список.</span><span>Без аккаунта · Без лишнего</span></footer>
-</main>
-</body></html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f6fb" />
+    <meta
+      name="description"
+      content="Личный список задач: добавляйте дела, отмечайте выполненное и возвращайтесь к списку в своём браузере."
+    />
+    <title>Тихий список — мои задачи</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#task-input">Перейти к задачам</a>
+    <main>
+      <header class="masthead">
+        <a class="brand" href="./" aria-label="Тихий список, главная">
+          <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path d="M5 16.5 12 23 28 6" />
+            <path d="M25 17v10H4V5h14" />
+          </svg>
+          <span>тихий список</span>
+        </a>
+        <span class="local-label">Личный список</span>
+      </header>
+      <section class="workspace" aria-labelledby="list-title">
+        <div class="workspace-heading">
+          <div>
+            <h1 id="list-title">Мои задачи</h1>
+            <p class="subtitle">Всё, что хочется сделать.</p>
+          </div>
+          <div class="progress-summary">
+            <span id="progress-label">0 из 0 выполнено</span>
+            <div
+              class="progress-track"
+              role="progressbar"
+              aria-label="Выполненные задачи"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div id="progress"></div>
+            </div>
+          </div>
+        </div>
+        <form id="add-form">
+          <label class="sr-only" for="task-input">Новая задача</label>
+          <input
+            id="task-input"
+            name="task"
+            maxlength="300"
+            placeholder="Что нужно сделать?"
+            autocomplete="off"
+            required
+          />
+          <button class="add-button" type="submit">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M10 4v12M4 10h12" />
+            </svg>
+            Добавить
+          </button>
+        </form>
+        <div class="list-toolbar">
+          <div class="filters" role="group" aria-label="Фильтр задач">
+            <button type="button" data-filter="all" aria-pressed="true">
+              Все <span id="all-count">0</span>
+            </button>
+            <button type="button" data-filter="active" aria-pressed="false">
+              В работе
+            </button>
+            <button type="button" data-filter="done" aria-pressed="false">
+              Готово
+            </button>
+          </div>
+        </div>
+        <h2 class="sr-only">Список задач</h2>
+        <ul id="tasks" aria-label="Задачи"></ul>
+        <div id="empty" class="empty">
+          <svg
+            class="empty-icon"
+            viewBox="0 0 72 64"
+            fill="none"
+            aria-hidden="true"
+          >
+            <rect x="10" y="13" width="20" height="20" rx="5" />
+            <path d="m16 22 4 4 10-12M42 23h20M10 47h52" />
+          </svg>
+          <h3>Список пока пуст</h3>
+          <p>Запишите первое дело в поле выше.</p>
+        </div>
+        <div class="workspace-footer">
+          <span id="save-label">Сохраняется в этом браузере</span>
+          <a
+            class="source-link"
+            href="https://github.com/slavques/the-digital-todo"
+            >Код на GitHub</a
+          >
+        </div>
+      </section>
+      <p id="notice" role="status" aria-live="polite" aria-atomic="true"></p>
+      <noscript
+        ><p class="noscript">
+          Чтобы работать со списком задач, включите JavaScript в браузере.
+        </p></noscript
+      >
+    </main>
+  </body>
+</html>
