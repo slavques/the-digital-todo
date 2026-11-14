@@ -3,4 +3,7 @@ tests/*.png
 playwright-report/
 test-results/
 site/
+.hallmark/
+.taste-skill/
+shots/
 .DS_Store

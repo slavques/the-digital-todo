@@ -6,7 +6,15 @@ const output = new URL("site/", root);
 await rm(output, { recursive: true, force: true });
 await mkdir(output);
 
-for (const file of ["index.html", "styles.css", "app.js", "model.js"]) {
+for (const file of [
+  "index.html",
+  "styles.css",
+  "tokens.css",
+  "base.css",
+  "app.js",
+  "model.js",
+  "theme.js",
+]) {
   await cp(new URL(file, root), new URL(file, output));
 }
 

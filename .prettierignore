@@ -2,4 +2,7 @@ node_modules/
 playwright-report/
 test-results/
 site/
+.hallmark/
+.taste-skill/
+shots/
 package-lock.json

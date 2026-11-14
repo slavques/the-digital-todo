@@ -10,15 +10,23 @@ const $ = (selector) => document.querySelector(selector);
 const input = $("#task-input");
 const notice = $("#notice");
 const list = $("#tasks");
+const undoButton = $("#undo-delete");
 const filterButtons = [...document.querySelectorAll("[data-filter]")];
 
 let tasks = [];
 let filter = "all";
 let storageAvailable = true;
+let lastDeletion = null;
 
 function announce(message, kind = "success") {
   notice.textContent = message;
   notice.dataset.kind = kind;
+}
+
+function clearUndo() {
+  if (undoButton === document.activeElement) input.focus();
+  lastDeletion = null;
+  if (undoButton) undoButton.hidden = true;
 }
 
 try {
@@ -85,6 +93,7 @@ function createTaskElement(task, index) {
   checkbox.checked = task.done;
   checkbox.dataset.taskId = task.id;
   checkbox.addEventListener("change", () => {
+    clearUndo();
     tasks = toggleTask(tasks, task.id);
     saveAndRender(
       task.done ? "Задача возвращена в работу." : "Задача выполнена.",
@@ -100,10 +109,27 @@ function createTaskElement(task, index) {
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "remove";
-  remove.textContent = "×";
+  const removeIcon = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg",
+  );
+  removeIcon.setAttribute("viewBox", "0 0 20 20");
+  removeIcon.setAttribute("fill", "none");
+  removeIcon.setAttribute("aria-hidden", "true");
+  const removePath = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "path",
+  );
+  removePath.setAttribute("d", "m6 6 8 8M14 6l-8 8");
+  removeIcon.append(removePath);
+  remove.append(removeIcon);
   remove.dataset.taskId = task.id;
   remove.setAttribute("aria-label", `Удалить задачу: ${task.text}`);
   remove.addEventListener("click", () => {
+    lastDeletion = {
+      task,
+      index: tasks.findIndex((item) => item.id === task.id),
+    };
     tasks = deleteTask(tasks, task.id);
     saveAndRender("Задача удалена.");
     focusTask(null, index);
@@ -114,6 +140,7 @@ function createTaskElement(task, index) {
 }
 
 function render() {
+  if (undoButton) undoButton.hidden = !lastDeletion;
   const completed = tasks.filter((task) => task.done).length;
   const percent = tasks.length
     ? Math.round((completed / tasks.length) * 100)
@@ -141,7 +168,7 @@ function render() {
     ],
     done: [
       "Выполненных задач пока нет",
-      "Отмечайте сделанное — оно появится здесь.",
+      "Отмечайте сделанное. Оно появится здесь.",
     ],
   };
   $("#empty h3").textContent = emptyMessages[filter][0];
@@ -161,6 +188,7 @@ $("#add-form").addEventListener("submit", (event) => {
     return;
   }
 
+  clearUndo();
   tasks = addTask(tasks, input.value, crypto.randomUUID());
   filter = "all";
   saveAndRender("Задача добавлена.");
@@ -169,6 +197,20 @@ $("#add-form").addEventListener("submit", (event) => {
 });
 
 input.addEventListener("input", () => input.setCustomValidity(""));
+
+undoButton?.addEventListener("click", () => {
+  if (!lastDeletion) return;
+
+  const { task, index } = lastDeletion;
+  clearUndo();
+  tasks = [...tasks.slice(0, index), task, ...tasks.slice(index)];
+  if (!visibleTasks().some((item) => item.id === task.id)) filter = "all";
+  saveAndRender("Удаление отменено.");
+  focusTask(
+    task.id,
+    visibleTasks().findIndex((item) => item.id === task.id),
+  );
+});
 
 for (const button of filterButtons) {
   button.addEventListener("click", () => {
@@ -182,6 +224,7 @@ window.addEventListener("storage", (event) => {
 
   try {
     if (event.storageArea !== localStorage) return;
+    clearUndo();
 
     const focusedTaskId = document.activeElement.dataset.taskId;
     const previousIndex = visibleTasks().findIndex(

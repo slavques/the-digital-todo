@@ -1,0 +1,91 @@
+:root {
+  color-scheme: light;
+  --font-body: "Onest", system-ui, sans-serif;
+  --font-display: var(--font-body);
+  --canvas: #eef0f3;
+  --paper: #ffffff;
+  --surface: #f6f7f9;
+  --surface-hover: #edf0f5;
+  --ink: #202634;
+  --secondary: #586476;
+  --accent: #3158cc;
+  --accent-hover: #2446b0;
+  --accent-ink: #ffffff;
+  --accent-soft: #e9eefc;
+  --rule: #dce1e8;
+  --control-border: #818b9a;
+  --focus: #3158cc;
+  --error: #a12c32;
+  --error-background: #fff0f0;
+  --color-paper: var(--canvas);
+  --color-paper-2: var(--paper);
+  --color-paper-3: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--secondary);
+  --color-accent: var(--accent);
+  --color-focus: var(--focus);
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.2rem;
+  --text-xl: 1.44rem;
+  --text-2xl: 1.728rem;
+  --text-meta: 0.8125rem;
+  --radius-control: 8px;
+  --radius-panel: 16px;
+  --container: 1000px;
+  --gutter: 32px;
+  --body-weight: 400;
+  --dur-micro: 120ms;
+  --dur-short: 180ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-mode="dark"] {
+  color-scheme: dark;
+  --canvas: #11151b;
+  --paper: #1b2028;
+  --surface: #232a34;
+  --surface-hover: #2b3441;
+  --ink: #eef0f5;
+  --secondary: #adb6c6;
+  --accent: #91a7f0;
+  --accent-hover: #a6b9f8;
+  --accent-ink: #14223e;
+  --accent-soft: #27334e;
+  --rule: #343c48;
+  --control-border: #69788e;
+  --focus: #a6b9f8;
+  --error: #ffb3b7;
+  --error-background: #3b252e;
+  --body-weight: 350;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode]) {
+    color-scheme: dark;
+    --canvas: #11151b;
+    --paper: #1b2028;
+    --surface: #232a34;
+    --surface-hover: #2b3441;
+    --ink: #eef0f5;
+    --secondary: #adb6c6;
+    --accent: #91a7f0;
+    --accent-hover: #a6b9f8;
+    --accent-ink: #14223e;
+    --accent-soft: #27334e;
+    --rule: #343c48;
+    --control-border: #69788e;
+    --focus: #a6b9f8;
+    --error: #ffb3b7;
+    --error-background: #3b252e;
+    --body-weight: 350;
+  }
+}
