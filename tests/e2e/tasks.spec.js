@@ -521,3 +521,33 @@ for (const mode of ["light", "dark"]) {
     expect((await scan()).violations).toEqual([]);
   });
 }
+
+test("pagination follows filters and removes an empty last page", async ({
+  page,
+}) => {
+  await page.goto("/");
+  for (let i = 1; i <= 8; i++) await addTask(page, `Страница, дело ${i}`);
+  await expect(page.locator("#page-range")).toHaveText("7–8 из 8");
+  await expect(page.locator(".task")).toHaveCount(2);
+  await page
+    .getByRole("button", { name: "Страница 1", exact: true })
+    .press("Enter");
+  await expect(page.locator(".task")).toHaveCount(6);
+  await page
+    .getByRole("button", { name: "Страница 2", exact: true })
+    .press("Enter");
+  for (const i of [8, 7])
+    await page
+      .getByRole("button", {
+        name: `Удалить задачу: Страница, дело ${i}`,
+        exact: true,
+      })
+      .press("Enter");
+  await expect(page.locator("#pagination")).toBeHidden();
+  await expect(page.locator(".task")).toHaveCount(6);
+  await page.getByRole("button", { name: "Готово", exact: true }).click();
+  await expect(page.locator(".task")).toHaveCount(0);
+  await expect(page.locator("#pagination")).toBeHidden();
+  await page.reload();
+  await expect(page.locator(".task")).toHaveCount(6);
+});
